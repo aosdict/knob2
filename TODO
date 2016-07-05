@@ -1,0 +1,52 @@
+Critical issues
+=================================
+Dealing with non-ASCII characters (CP437? Extended ASCII? Unicode?)
+Ability to go back in the input buffer and edit text
+
+
+Normal things
+=================================
+Different input buffers for every channel
+005 command prints out the trail only, which in freenode's case at least is merely "are supported by this server". Requires some investigation into how other servers use this command. Freenode passes the important data in the params list. Same for the 004 command, apparently.
+Nonstandard messages should have a safety net, a try/except probably. They should not crash the program if in an unexpected format.
+Test out the INFO command (raw) on freenode
+Implement command 441: ":server 441 me them #channel :They aren't on that channel" returned when trying to /op someone whose nick existed but who was not on the channel
+Implement command 331: ":server 331 me #channel :No topic is set" when trying to do /topic when no topic was set
+/knock or IRC KNOCK command
+Implement commands 371 ":server 371 me :Info Text", 374 ":server 374 me :End of /INFO list", user /info command
+Several settings aren't controllable by options. Make a list of these and add them to option.
+Think about adding addToCurrAsNotice as a function
+command 443 is wrong: it can be returned when you try to /invite someone to a channel who is already on that channel, and in this case it displays incorrectly.
+double enter for submitting anything because a stray enter can do bad things
+command 742: :sinisalo.freenode.net 742 RPI_OpBot ##rpicschat t ntcslk :MODE cannot be set du
+e to channel having an active MLOCK restriction policy
+
+
+Minor things
+=================================
+Change format-commands, settings.formatCommands etc. to "input" rather than "commands"
+Implement bolding of text with ^B characters/underlining with ^_ characters
+Bold messages that appear when current nick is mentioned
+If new activity happens in other windows raising a !, tab should go over to them without cycling through other channels
+PINGs from the server are not treated as raw when they are rendered. Same for the welcome message.
+Add option to show seconds
+Think about phasing out the special "you" color - it doesn't add too much to the experience, creates many extra cases, and takes up the bright cyan color which could be used by something else
+Think about changing command error messages to the format "/command: error message"
+Think about adding a new function that determines whether a "channel" (window) is actually a channel on the server.
+Add setting to control notifying other people when you block them: you can 1) post a message to channels you're both in; 2) post a message to them directly, or 3) post nothing. In the cases where you send a message, have those messages be settings.
+IRC code 249
+
+
+Wishlist
+=================================
+Add a user-specific ~/.irc_conf file that maps server/nick combinations to realname/ident combos. When a user tries to log into a server/nick combo that exists, autosupply the ident and real name (override if they are specified on the command line). This file can also be used for other settings.
+Make the time limit settable as a conf file setting.
+Add a locking option/lurker mode that ignores all your input unless it is the unlocking command
+Add a command to display a list of windows.
+Add an option(s) to control the visibility of joins/parts/quits/modechange/etc
+Add a command to "go to bottom". Actually, just have better navigation.
+Bell option - sound system bell when new messages come in
+Code Page 437 support?
+/mode greater adaptability - you *should* be able to do /mode #channel +v nick without being on that channel, but you can't now
+Add /encirclehelp as a separate command (involves creating help pages and maybe a system to display them in the program)
+Channel muting or marking the ! in a different color
