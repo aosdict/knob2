@@ -11,190 +11,8 @@ import encircleVars as variables
 # Variables that are static to this irclib module.
 timeOfLastRemove = time.time()
 
-# Small class to bundle IRC data into an easy to parse format.
-class irc:
-    prefix = ""
-    command = ""
-    params = []
-    trail = ""
 
-    def __init__(self, p, c, ps, t):
-        self.prefix = p;
-        self.command = c;
-        self.params = ps;
-        self.trail = t;
 
-    # If the prefix is user!~server.com or similar, gets "user" from it
-    def getName(self):
-        return extractName(self.prefix)
-
-# Another class to represent a printable string.
-# It has a nick string and a body string. 
-class prn:
-    strlist = []
-    typlist = []
-    tstamp = None
-    important = False
-
-    def __init__(self, strlist, typlist, important=False):
-        self.strlist = strlist
-        self.typlist = typlist
-        self.tstamp = time.time()
-        self.important = important
-
-    # Return the number of extra lines that are needed to print in a terminal
-    # horiz characters wide.
-    def getOverflowLines(self, horiz):
-        # if showing time, there will be an extra "[xx:xx] " (8 chars)
-        currlen = 8 if settings.showTime else 0
-        lin = 0
-        for x in self.strlist:
-            if x == '\n':
-                # special case, auto cut to next line
-                currlen = 0
-                lin += 1
-                continue
-            currlen += len(x)
-            if currlen > horiz:
-                lin += currlen // horiz
-                currlen = currlen % horiz
-        return lin
-
-# Class to represent a channel.
-class chan:
-    # Subclass representing data about a user.
-    class user:
-        name = ""
-        isOp = False
-        def __init__(self, name, isOp=False):
-            self.name = name; self.isOp = isOp
-            
-    name = ""
-    peopleOn = [] # list of user objects
-    msgs = [] # list of prn objects
-    isQuery = False # if this is a query window (set of PMs, not a real channel)
-    hasUnread = False # if true, the program will notify the user of this
-    
-    def __init__(self, name, iQ=False):
-        self.name = name
-        self.peopleOn = []
-        self.msgs = []
-        self.isQuery = iQ
-        self.hasUnread = False
-
-    # Adds a person to peopleOn
-    def addUser(self, name):
-        op = False
-        tmp = name
-        if name[0] == '@':
-            op = True
-            tmp = name[1:]
-        self.peopleOn.append(self.user(tmp, op))
-
-    # Removes a person from peopleOn
-    def removeUser(self, name):
-        for p in self.peopleOn:
-            if p.name == name:
-                self.peopleOn.remove(p)
-                break
-
-    # Determines if the given nick exists in peopleOn
-    def nickOn(self, nick):
-        if self.isQuery:
-            return (self.name == nick)
-        for p in self.peopleOn:
-            if p.name == nick: return True
-        return False
-
-# Library of functions
-
-# Get the current channel name as a string.
-def getCurrChannelName():
-    return variables.chanlist[variables.currChannel].name
-
-# Given a channel name, return the index of that channel.
-def getChannelNumber(name):
-    x = 0
-    for c in variables.chanlist:
-        if c.name == name:
-            return x
-        x += 1
-    return -1
-
-# Get the channel object from its name
-def getNamedChannel(name):
-    for c in variables.chanlist:
-        if c.name == name:
-            return c
-
-#
-# FIND/INSERT/ERASE FUNCTIONS ON THE CHANNEL LIST
-# insertChannel, eraseChannel
-
-# Given a channel name, attempt to insert that channel into the list. If it
-# already exists, return its number. If it gets inserted, also return its number
-# Second argument determines whether this should be marked as a query channel.
-def insertChannel(name, isQuery):
-    x=0
-    for c in variables.chanlist:
-        if c.name == name:
-            return x
-        x += 1
-    variables.chanlist.append(chan(name, isQuery))
-    return len(variables.chanlist) - 1
-
-# Remove a channel with the given name from the list. (actually all channels)
-def eraseChannel(name):
-    for c in variables.chanlist:
-        if c.name == name:
-            variables.chanlist.remove(c)
-            return
-
-#
-# FUNCTIONS FOR ADDING MESSAGES TO A CHANNEL
-# addChannel, addNumChannel, addCurrChannel, addNamedChannel
-
-# Inserts a new prn object into a given channel.
-# Every other add function is a wrapper for this one.
-def addChannel(chan, msg):
-    # check to see if messages should be deleted
-    now = time.time()
-    global timeOfLastRemove
-    if now - timeOfLastRemove > settings.msgTimeout:
-        removeAllOldMessages()
-        timeOfLastRemove = now
-
-    chan.msgs.append(msg)
-    # make a note that the channel's most recent message came in now
-    chan.hasUnread = chan.hasUnread or msg.important
-    
-# Inserts a new prn object into a numbered channel.
-def addNumChannel(num, msg):
-    if num > len(variables.chanlist):
-        # no real defined behavior for this
-        pass
-    else:
-        c = variables.chanlist[num]
-        addChannel(c, msg)
-
-# Inserts a new prn object into the current channel.
-def addCurrChannel(msg):
-    addNumChannel(variables.currChannel, msg)
-
-# Inserts a new prn object into a channel identified by name.
-def addNamedChannel(name, msg):
-    x = getChannelNumber(name)
-    addNumChannel(x, msg)
-
-# Inserts a new prn object into the current channel, using only one string,
-# formatted as an error.
-# This exists because there are a lot of error cases that get added to the
-# current channel and addCurrChannel(prn([blahblah],['error'])) takes a lot of
-# space.
-def addToCurrAsError(msg):
-    addCurrChannel(prn([msg],['error']))
-
-#
 # FUNCTIONS FOR PARSING RECEIVED IRC MESSAGES
 # extractName, isAction, parse
 
@@ -206,55 +24,18 @@ def isAction(trail): # determines whether trail is an ACTION command
 
 def parse(line): # take a raw line from the server and split into components
     #format of IRC strings is :<prefix> <command> <params> :<trail>
-    #get prefix
-    prefixStart = 1 if (line[0] == ":") else 0
-    prefixEnd = line.find(" ")
-    prefix = line[prefixStart:prefixEnd]
-
-    #get trail, which is unique in that it is the first part of the line
-    #to begin with " :"
-    trailStart = line.find(" :")
-    if trailStart > 0:
-        commandEnd = trailStart
-        trailStart += 2
-    else:
-        commandEnd = len(line)
-        trailStart = len(line)
-    trail = line[trailStart:]
-
-    #command and params are between the prefix and trail
-    commandStart = prefixEnd+1
-    commandString = line[commandStart:commandEnd].split();
-    command = commandString[0]
-    params = commandString[1:]
 
     return irc(prefix, command, params, trail)
 
-# Clear out all outdated messages from all channels.
-def removeAllOldMessages():
-    now = time.time()
-    for c in variables.chanlist:
-        #c.msgs.append(prn(['Cleanup time'], ['none']))
-        ctr = 0
-        for msg in c.msgs:
-            if now - msg.tstamp < settings.msgTimeout:
-                break
-            else:
-                ctr += 1
-        c.msgs = c.msgs[ctr:]
             
 # Given a raw message from the server, parse it, format it, and possibly add it
 # to the list of strings to be formatted.
 def process(msg):
-    # If the formatOutput settings is true, do no formatting or filtering.
-    if settings.formatOutput == False:
-        addCurrChannel(prn([msg], ['none']))
-        return
         
     # Create the IRC structure from the message
     p = parse(msg)
 
-    extra = False # flag for debugging/unknown messages
+    unknown_msg_type = False # flag for debugging/unknown messages
     
     if p.command == 'PRIVMSG':
         # get sender's name first; they might be blocked

@@ -21,12 +21,9 @@ def socksend(string):
 
 # Get a single line from the IRC server
 def getLine():
-   tmp=s.recv(1)
+   tmp=s.recv(1024)
    if not tmp: # connection closed
       return None
-
-   while '\n' not in tmp:
-      tmp += s.recv(1)
 
    tmp = tmp.rstrip('\r\n')
    return tmp
@@ -164,27 +161,34 @@ while 1:
 if attemptChannel != '': socksend('JOIN '+attemptChannel)
 
 while True:
-   try:
-       data = getLine()
-   except socket.error as serr:
-      if serr.errno == errno.ECONNRESET:
-         finish("Connection closed.", 1, 'Connection closed')
-      raise serr
+   read_socks, write_socks, err_socks = select.select([sys.stdin, s], [], [])
+   for sock in read_socks:
+      if sock == s:
+         try:
+            data = getLine()
+         except socket.error as serr:
+            if serr.errno == errno.ECONNRESET:
+               finish("Connection closed.", 1, 'Connection closed')
+            raise serr
 
-   if data is None:
-      finish('Connection terminated', 1, 'Connection terminated')
+         if data is None:
+            finish('Connection terminated', 1, 'Connection terminated')
 
-   elif data[:4] == "PING":
-      socksend('PONG :Pong')
-      if settings.showPings:
-         print 'PING'
-      continue
+         elif data[:4] == "PING":
+            socksend('PONG :Pong')
+            if settings.showPings:
+               print 'PING'
+            continue
 
-   elif data[:5] == 'ERROR':
-      # something very bad is happening
-      print data
+         elif data[:5] == 'ERROR':
+            # something very bad is happening
+            print data
 
-   else:
-      elib.process(data)
+         else:
+            print data
+            elib.process(data)
 
+      elif sock == sys.stdin:
+         # TODO
+         pass
 
