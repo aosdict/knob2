@@ -154,7 +154,11 @@ class Bot:
                   print 'Problem parsing received line: %s' % e
 
                if msg.command in self.hooks:
-                  self.hooks[msg.command](self, msg)
+                  try:
+                     self.hooks[msg.command](self, msg)
+                  except:
+                     # TODO
+                     print 'Exception triggered, too lazy to diagnose', msg
                else:
                   pass
                   # print 'No hook found'
