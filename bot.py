@@ -22,6 +22,9 @@ class Bot:
    def __init__(self, settings = {}):
       self.sock = None
       self.settings = settings
+      # TODO: make a setting for "notify level" controlling what gets printed
+      # at different priority levels.
+
       # hooks is a dictionary mapping IRC command strings, 
       # like 'PRIVMSG', 'NICK' or '224', to functions that will be called with
       # this bot instance and an IRC object whenever the bot receives a message 
@@ -30,7 +33,7 @@ class Bot:
       self.hooks = {
          'PING': self._pong
       }
-      # TODO: add hooks for successful channel join,
+      # TODO: add hooks for successful channel join, nick (changes self.nick)
 
 
    # Send a string to the IRC server over the socket. This just removes the
@@ -118,6 +121,12 @@ class Bot:
 
    # Make the bot say a message to a given channel or nick.
    def say(self, msg_str, recipient):
+      # It should never try to send a direct message to itself.
+      # This can cause a feedback loop where it keeps resending
+      # messages which will eventually get it kicked for flooding.
+      if recipient == self.nick:
+         print 'Warning: bot tried to send a message to itself'
+         return
       self.__socksend('PRIVMSG %s :%s' % (recipient, msg_str))
 
 
