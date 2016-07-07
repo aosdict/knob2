@@ -1,0 +1,3 @@
+Spawn new threads for hook functions.
+Concept of privilege levels (at least 2): anyone can use the lowest level but only certain users/nicks can run commands at higher levels
+List of nicks who are privileged
