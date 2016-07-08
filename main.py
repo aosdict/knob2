@@ -9,6 +9,7 @@ from bson.objectid import ObjectId
 import sys
 import re
 import time
+import random
 
 mclient = pymongo.MongoClient('localhost', 27017)
 db = mclient['jbot']
@@ -31,7 +32,6 @@ def get_user(nick):
 def adjust_karma(karma_mod_list, bot, channel, sender):
    for s in karma_mod_list:
       # don't let people change their own karma
-      print s, sender
       if s.find(sender) == 0:
          continue
 
@@ -65,6 +65,11 @@ def adjust_karma(karma_mod_list, bot, channel, sender):
 
 # Save a message from someone in the database so it can be retrieved later.
 def save_quote(message, sender):
+   if ord(message[0]) == 1:
+      # message[1:7] should be 'ACTION' and message[:-1] should be \1 as well
+      # convert it into sender's name plus the rest of the message
+      message = sender + message[7:-1]
+
    numquotes = db.quotes.count()
    newquote = {
       'author': sender,
@@ -95,7 +100,10 @@ def handle_command(bot, message, sender):
 
    if cmd_list[1] == 'quote':
       # pick random number mod numquotes and get the quote with that index
-      pass
+      numquotes = db.quotes.count()
+      quotenum = random.randint(0, numquotes-1)
+      quote = db.quotes.find_one({'index': quotenum})
+      bot.say('"' + quote['quote'] + '" -- ' + quote['author'])
 
 
 # Hook for PRIVMSG commands and reacting to them. This will be the biggest part of most bots.
@@ -124,10 +132,10 @@ def privmsg_fn(bot, msg):
       # add this message to the database of quotes for this sender
       save_quote(message, sender)
 
+
 settings = {
 }
 
-print sys.argv
 if len(sys.argv) != 4:
    print 'Usage:', sys.argv[0], 'server nick channel_list'
    sys.exit(1)
