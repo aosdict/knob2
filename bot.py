@@ -139,11 +139,13 @@ class Bot:
 
          for sock in read_socks:
             if sock == sys.stdin:
-               user_input = sys.stdin.readline().rstrip('\n')
-               if user_input.lower() == 'quit':
+               user_input = sys.stdin.readline().rstrip('\n').split()
+               if user_input[0].lower() == 'quit':
                   return
+               elif user_input[0].lower() == 'tell':
+                  self.say(' '.join(user_input[2:]), user_input[1])
 
-            if sock == self.sock:
+            elif sock == self.sock:
                try:
                   msg = irc_message.IrcMessage(self.__get_line())
                   print msg
@@ -156,9 +158,10 @@ class Bot:
                if msg.command in self.hooks:
                   try:
                      self.hooks[msg.command](self, msg)
-                  except:
+                  except Exception as e:
                      # TODO
                      print 'Exception triggered, too lazy to diagnose', msg
+                     print e
                else:
                   pass
                   # print 'No hook found'
