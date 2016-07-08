@@ -97,6 +97,7 @@ class Bot:
             attempt_nick += '_'
             print 'Trying with', attempt_nick
             self.__socksend('NICK ' + attempt_nick)
+         # TODO 432 Erroneous Nickname
          else:
             print 'Unknown IRC command:', msg
 
@@ -159,8 +160,7 @@ class Bot:
                   try:
                      self.hooks[msg.command](self, msg)
                   except Exception as e:
-                     # TODO
-                     print 'Exception triggered, too lazy to diagnose', msg
+                     print 'Exception triggered from message:', msg
                      print e
                else:
                   pass
