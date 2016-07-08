@@ -28,8 +28,13 @@ def get_user(nick):
 
 
 # Given a list of nicks with ++ or -- after them, adjust each user's karma accordingly.
-def adjust_karma(karma_mod_list, bot, channel):
+def adjust_karma(karma_mod_list, bot, channel, sender):
    for s in karma_mod_list:
+      # don't let people change their own karma
+      print s, sender
+      if s.find(sender) == 0:
+         continue
+
       has_plusplus = ( s.find('++') >= 0 )
       has_minusminus = ( s.find('--') >= 0 )
 
@@ -52,7 +57,6 @@ def adjust_karma(karma_mod_list, bot, channel):
 
       nick = s.rstrip('+-')
       user = get_user(nick)
-      print user
       new_karma = user['karma'] + delta
       db.users.update({'nick': nick}, { '$set':  { 'karma': new_karma } })
       point_str = "point" if (new_karma == 1 or new_karma == -1) else "points"
@@ -61,8 +65,7 @@ def adjust_karma(karma_mod_list, bot, channel):
 
 # Save a message from someone in the database so it can be retrieved later.
 def save_quote(message, sender):
-   quotes_singleton = db.singletons.find_one({'collection': 'quotes'})
-   numquotes = quotes_singleton['total_quotes']
+   numquotes = db.quotes.count()
    newquote = {
       'author': sender,
       'quote': message,
@@ -73,12 +76,13 @@ def save_quote(message, sender):
    # see if this quote contains "is" or "are" so it can be marked specially
    isare = re.findall('([^\s]+)\s+(?:is|are)', message)
    if len(isare) > 0:
-      newquote['is'] = isare
+      new_isare = []
+      for x in isare:
+         # could insert a list of words that don't register here, like "this" or "they"
+         new_isare.append(x.lower())
+      newquote['is'] = new_isare
 
    db.quotes.insert(newquote)
-   db.singletons.update({'collection': 'quotes'}, {'total_quotes': numquotes+1})
-   # user = get_user(sender)
-   # db.users.update({'nick': sender}, {'$push': {'quotes': message}})
 
 
 # Handle a command to the bot. Commands could be virtually anything.
@@ -91,6 +95,7 @@ def handle_command(bot, message, sender):
 
    if cmd_list[1] == 'quote':
       # pick random number mod numquotes and get the quote with that index
+      pass
 
 
 # Hook for PRIVMSG commands and reacting to them. This will be the biggest part of most bots.
@@ -113,21 +118,28 @@ def privmsg_fn(bot, msg):
       karma_mod_list = re.findall('[^ ]+(?:\+\+|--)', message)
       if len(karma_mod_list) > 0:
          # do not record karma mods as quotes
-         adjust_karma(karma_mod_list, bot, channel)
+         adjust_karma(karma_mod_list, bot, channel, sender)
          return
 
       # add this message to the database of quotes for this sender
       save_quote(message, sender)
 
-   # bot.say(msg.trail, recipient)
-
 settings = {
 }
 
+print sys.argv
+if len(sys.argv) != 4:
+   print 'Usage:', sys.argv[0], 'server nick channel_list'
+   sys.exit(1)
+
+server = sys.argv[1]
+start_nick = sys.argv[2]
+channels = sys.argv[3].split(',')
 
 jbot = bot.Bot(settings)
 jbot.add_hook('PRIVMSG', privmsg_fn)
 # jbot.connect('irc.freenode.net', 'sjdhfkj')
-jbot.connect('irc.devel.redhat.com', 'jbeck_bot')
-jbot.join('#cee-tools-interns')
+jbot.connect(server, start_nick)
+for chan in channels:
+   jbot.join('#'+chan)
 jbot.interact()
