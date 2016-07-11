@@ -59,8 +59,10 @@ def adjust_karma(karma_mod_list, bot, channel, sender):
       user = get_user(nick)
       new_karma = user['karma'] + delta
       db.users.update({'nick': nick}, { '$set':  { 'karma': new_karma } })
-      point_str = "point" if (new_karma == 1 or new_karma == -1) else "points"
-      bot.say(nick + ' now has ' + str(new_karma) + ' ' + point_str + ' of karma', channel)
+      points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
+      out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)
+      print out_str
+      bot.say(out_str, channel)
 
 
 # Save a message from someone in the database so it can be retrieved later.
@@ -91,19 +93,24 @@ def save_quote(message, sender):
 
 
 # Handle a command to the bot. Commands could be virtually anything.
-def handle_command(bot, message, sender):
+# Returns True if the message should not be parsed after handling the command.
+def handle_command(bot, message, sender, original_recipient):
    cmd_list = message.split()
    # cmd_list[0] is expected to be the bot's name
    if len(cmd_list) < 2:
       # can't really do anything without a command
-      return
+      return False
 
    if cmd_list[1] == 'quote':
       # pick random number mod numquotes and get the quote with that index
       numquotes = db.quotes.count()
       quotenum = random.randint(0, numquotes-1)
       quote = db.quotes.find_one({'index': quotenum})
-      bot.say('"' + quote['quote'] + '" -- ' + quote['author'])
+      recipient = sender if original_recipient == bot.nick else original_recipient
+      bot.say('"' + quote['quote'] + '" -- ' + quote['author'], recipient)
+      return True
+
+   return False
 
 
 # Hook for PRIVMSG commands and reacting to them. This will be the biggest part of most bots.
@@ -114,7 +121,8 @@ def privmsg_fn(bot, msg):
 
    # look for a command to the bot (denoted by any string starting with the bot's nick)
    if message.find(bot.nick) == 0:
-      handle_command(bot, message, sender)
+      if handle_command(bot, message, sender, recipient):
+         return
 
    is_private = (recipient == bot.nick)
 

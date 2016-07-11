@@ -81,7 +81,8 @@ class Bot:
       # wait for 001 (successful connection to the server)
       while command != "001":
          try:
-            msg = irc_message.IrcMessage(self.__get_line())
+            line = self.__get_line()
+            msg = irc_message.IrcMessage(line)
          except EOFError as e:
             print 'Connection closed while waiting for 001'
             raise e
@@ -125,6 +126,7 @@ class Bot:
       # It should never try to send a direct message to itself.
       # This can cause a feedback loop where it keeps resending
       # messages which will eventually get it kicked for flooding.
+      print 'Saying', msg_str, 'to', recipient
       if recipient == self.nick:
          print 'Warning: bot tried to send a message to itself'
          return
