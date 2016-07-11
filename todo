@@ -6,3 +6,4 @@ Make the value-type of hooks lists of functions rather than a single function, s
 Modularize extensions more.
 Maintain a dictionary of channel names to lists of nicks on those channels. This should be its own complete extension. It would involve hooking PART, NICK, JOIN, QUIT, NAMES commands.
 Handle 432 Erroneous Nickname command when trying to connect.
+Settings to control printing of certain messages to the console, like say results and numeric commands.
