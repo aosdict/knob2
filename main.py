@@ -4,67 +4,20 @@
 
 import bot
 import irc_message
+import extension
 import pymongo
 from bson.objectid import ObjectId
 import sys
-import re
 import time
 import random
+
+import extensions.karma_tracker as karma_tracker
 
 mclient = pymongo.MongoClient('localhost', 27017)
 db = mclient['jbot']
 
-# Given a nick, return a dictionary representing the associated user in the database.
-# This will create a user if no user with the nick exists.
-def get_user(nick):
-   user = db.users.find_one({'nick': nick})
-   if user is None:
-      new_user = {
-         'nick': nick,
-         'karma': 0,
-      }
-      new_id = db.users.insert(new_user)
-      user = db.users.find_one({'_id': ObjectId(new_id)})
-   return user
 
-
-# Given a list of nicks with ++ or -- after them, adjust each user's karma accordingly.
-def adjust_karma(karma_mod_list, bot, channel, sender):
-   for s in karma_mod_list:
-      # don't let people change their own karma
-      if s.find(sender) == 0:
-         continue
-
-      has_plusplus = ( s.find('++') >= 0 )
-      has_minusminus = ( s.find('--') >= 0 )
-
-      if has_plusplus and has_minusminus:
-         # string has both ++ and -- in it, someone is probably trying to confuse the bot
-         if len(karma_mod_list) == 1:
-            bot.say("Don't try to break me.", channel)
-            return
-         # if there are other karma mods, go to them
-         continue
-
-      elif has_plusplus:
-         delta = 1
-      elif has_minusminus:
-         delta = -1
-      else:
-         # neither ++ or -- happened, this should not be possible
-         print 'Warning: karma_mod_list encountered a name not followed by ++ or --:', s
-         continue
-
-      nick = s.rstrip('+-')
-      user = get_user(nick)
-      new_karma = user['karma'] + delta
-      db.users.update({'nick': nick}, { '$set':  { 'karma': new_karma } })
-      points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
-      out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)
-      print out_str
-      bot.say(out_str, channel)
-
-
+'''
 # Save a message from someone in the database so it can be retrieved later.
 def save_quote(message, sender):
    if ord(message[0]) == 1:
@@ -130,20 +83,15 @@ def privmsg_fn(bot, msg):
       # public message in a channel
       channel = recipient
 
-      # look for a ++ or -- in the string (karma up/down)
-      karma_mod_list = re.findall('[^ ]+(?:\+\+|--)', message)
-      if len(karma_mod_list) > 0:
-         # do not record karma mods as quotes
-         adjust_karma(karma_mod_list, bot, channel, sender)
-         return
 
       # add this message to the database of quotes for this sender
       save_quote(message, sender)
-
+'''
 
 settings = {
 }
 
+# handle command-line args
 if len(sys.argv) != 4:
    print 'Usage:', sys.argv[0], 'server nick channel_list'
    sys.exit(1)
@@ -153,9 +101,17 @@ start_nick = sys.argv[2]
 channels = sys.argv[3].split(',')
 
 jbot = bot.Bot(settings)
-jbot.add_hook('PRIVMSG', privmsg_fn)
-# jbot.connect('irc.freenode.net', 'sjdhfkj')
+
+# initialize all extensions
+karma_ext = karma_tracker.KarmaTracker(jbot, db)
+
+# jbot.add_hook('PRIVMSG', privmsg_fn)
+
+jbot.add_extension(karma_ext)
+
 jbot.connect(server, start_nick)
+
 for chan in channels:
    jbot.join('#'+chan)
+
 jbot.interact()
