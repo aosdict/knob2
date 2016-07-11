@@ -57,7 +57,7 @@ class IrcMessage:
 
 
    # If the prefix is user!~server.com or similar, gets "user" from it
-   def getName(self):
+   def getSender(self):
       return self.prefix.split('!')[0]
 
 
