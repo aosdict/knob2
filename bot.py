@@ -7,8 +7,10 @@ import sys
 import socket
 import select
 import errno
+import traceback
 
 import irc_message
+import extension
 
 # stop creating .pyc files
 sys.dont_write_bytecode = True
@@ -18,10 +20,12 @@ class Bot:
    nick = ""
    settings = {}
    hooks = {}
+   extensions = []
 
    def __init__(self, settings = {}):
       self.sock = None
       self.settings = settings
+      self.extensions = []
       # TODO: make a setting for "notify level" controlling what gets printed
       # at different priority levels.
 
@@ -39,7 +43,7 @@ class Bot:
    # Send a string to the IRC server over the socket. This just removes the
    # boilerplate \r\n on everything.
    def __socksend(self, line):
-      self.sock.send(line + '\r\n')
+      self.sock.sendall(line + '\r\n')
 
    # Get a line from the IRC server. Raises an EOFError if the connection is closed for some reason,
    # and also takes care of the \r\n on the end of every line.
@@ -158,16 +162,29 @@ class Bot:
                except ValueError as e:
                   print 'Problem parsing received line: %s' % e
 
-               if msg.command in self.hooks:
+               for ext in self.extensions:
                   try:
-                     self.hooks[msg.command](self, msg)
+                     ext.act(msg)
                   except Exception as e:
                      print 'Exception triggered from message:', msg
+                     print 'in extension', ext.name
                      print e
-               else:
-                  pass
-                  # print 'No hook found'
+                     traceback.print_exc()
 
+               # if msg.command in self.hooks:
+               #    try:
+               #       self.hooks[msg.command](self, msg)
+               #    except Exception as e:
+               #       print 'Exception triggered from message:', msg
+               #       print e
+               # else:
+               #    pass
+               #    # print 'No hook found'
+
+
+   # Adds an extension to the bot's internal list of extensions.
+   def add_extension(self, new_extension):
+      self.extensions.append(new_extension)
 
    ### 
    ### Default hook functions
