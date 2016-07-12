@@ -2,6 +2,7 @@
    Karma tracking extension.
    Records when users say "something++" or "something--" and uses a
    Mongo database to record their "karma" numbers.
+   Hooks: PRIVMSG
 """
 
 import re
@@ -16,9 +17,10 @@ class KarmaTracker(extension.Extension):
    name = "Karma Tracker"
    db = None
 
-   def __init__(self, bot, db):
+   def __init__(self, bot, db, allow_minus=True):
       super(KarmaTracker, self).__init__(bot)
       self.db = db
+      self.allow_minus = allow_minus
       self.hooks = {
          'PRIVMSG': self.privmsg_handler
       }
@@ -76,7 +78,11 @@ class KarmaTracker(extension.Extension):
 
 
    def privmsg_handler(self, msg):
-      karma_mod_list = re.findall('[^ ]+(?:\+\+|--)', msg.trail)
+      if self.allow_minus:
+         karma_mod_list = re.findall('[^ ]+(?:\+\+|--)', msg.trail)
+      else:
+         karma_mod_list = re.findall('[^ ]+\+\+', msg.trail)
+
       if len(karma_mod_list) > 0:
          recipient = msg.params[0]
          sender = msg.getSender()

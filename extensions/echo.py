@@ -1,7 +1,8 @@
 """
    Echo extension.
-   Simple extension that does nothing more than
-   echo whatever someone says back at them.
+   Simple extension that does nothing more than echo whatever
+   someone says back at them.
+   Hooks: PRIVMSG
 """
 
 import irc_message
