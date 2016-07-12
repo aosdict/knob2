@@ -182,9 +182,9 @@ class Bot:
                #    # print 'No hook found'
 
 
-   # Adds an extension to the bot's internal list of extensions.
-   def add_extension(self, new_extension):
-      self.extensions.append(new_extension)
+   # Sets the bot's internal list of extensions.
+   def set_extensions(self, extensions):
+      self.extensions = extensions
 
    ### 
    ### Default hook functions
