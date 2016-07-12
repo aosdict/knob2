@@ -25,10 +25,6 @@ class Extension(object):
       self.bot = bot
 
 
-   def add_hook(self, command, fn):
-      self.hooks[command] = fn
-
-
    # Act on an irc message. This should not be called by the programmer.
    # Return a truth value representing whether the bot should continue
    # trying to call act on other messages.
