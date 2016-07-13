@@ -13,6 +13,7 @@ import extension
 
 import extensions.karma_tracker as karma_tracker
 import extensions.quote_recorder as quote_recorder
+import extensions.sundry_commands as sundry_commands
 
 mclient = pymongo.MongoClient('localhost', 27017)
 db = mclient['jbot']
@@ -67,15 +68,25 @@ settings = {
 jbot = bot.Bot(settings)
 
 # initialize all extensions
-karma_ext = karma_tracker.KarmaTracker(jbot, db)
+karma_ext_settings = {
+   'prevent_spam': True,
+   'karma_timeout': 5,
+   'flush_period': 1,
+}
+karma_ext = karma_tracker.KarmaTracker(jbot, db, karma_ext_settings)
 quote_ext = quote_recorder.QuoteRecorder(jbot, db, True)
-
-# jbot.add_hook('PRIVMSG', privmsg_fn)
+sc_ext_settings = {
+   'show_server_stats': False,
+   'show_server_info': False,
+   'show_motd': False,
+}
+sc_ext = sundry_commands.SundryCommands(jbot, sc_ext_settings)
 
 # Order of extensions is important!
 jbot.set_extensions([
    karma_ext,
    quote_ext,
+   sc_ext,
 ])
 
 jbot.connect(server, start_nick)
@@ -84,3 +95,4 @@ for chan in channels:
    jbot.join('#'+chan)
 
 jbot.interact()
+jbot.cleanup()
