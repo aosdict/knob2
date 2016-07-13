@@ -29,4 +29,8 @@ class Echo(extension.Extension):
       else:
          self.bot.say(msg.trail, recipient)
 
-      return False
+      return True
+
+
+   def cleanup(self):
+      pass

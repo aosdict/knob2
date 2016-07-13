@@ -30,6 +30,6 @@ class Extension(object):
    # trying to call act on other messages.
    def act(self, msg):
       if msg.command not in self.hooks:
-         return True
+         return False
 
       return self.hooks[msg.command](msg)

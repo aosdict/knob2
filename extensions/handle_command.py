@@ -36,15 +36,15 @@ class CommandHandler(extension.Extension):
          command = cmd_list[0][1:]
 
          if not command in self.commands:
-            return True
+            return False
 
          params = cmd_list[1:]
          self.commands[command](params)
 
-         return False
+         return True
 
       # not a command
-      return True
+      return False
 
 
    # Say a randomly chosen quote from the database.
@@ -56,3 +56,7 @@ class CommandHandler(extension.Extension):
       quote = self.db.quotes.find_one({'index': quotenum})
       recipient = sender if original_recipient == bot.nick else original_recipient
       bot.say('"' + quote['quote'] + '" -- ' + quote['author'], recipient)
+
+
+   def cleanup(self):
+      pass

@@ -54,5 +54,9 @@ class QuoteRecorder(extension.Extension):
             newquote['is'] = new_isare
 
       self.db.quotes.insert(newquote)
-      return True
+      return False
+
+
+   def cleanup(self):
+      pass
 
