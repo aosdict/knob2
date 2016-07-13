@@ -1,11 +1,11 @@
 Spawn new threads for hook functions. (Make multithreaded a setting for the bot)
 Concept of privilege levels (at least 2): anyone can use the lowest level but only certain users/nicks can run commands at higher levels
 List of nicks who are privileged
-Timeout on karmaing people from the same nick
 Maintain a dictionary of channel names to lists of nicks on those channels. This should be its own complete extension. It would involve hooking PART, NICK, JOIN, QUIT, NAMES commands.
 Handle 432 Erroneous Nickname command when trying to connect.
-Settings to control printing of certain messages to the console, like say results and numeric commands.
+Settings to control printing of certain messages to the console, like say results.
 Prepend eventual project name to extension module and class.
 Change set_extensions to just an init parameter.
 Document how extensions can communicate with each other. They can be initialized with each other's instances.
 More commands for the user on command line.
+Extension to say something when bot joins a channel (either first channel or any channel)
