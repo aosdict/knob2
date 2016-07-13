@@ -24,6 +24,7 @@ class Bot:
 
    def __init__(self, settings = {}):
       self.sock = None
+      self.__init_settings(settings)
       self.settings = settings
       self.extensions = []
       # TODO: make a setting for "notify level" controlling what gets printed
@@ -35,10 +36,16 @@ class Bot:
       # of that command.
       # By default it automatically responds to PING messages with pongs.
       self.hooks = {
-         'PING': self._pong
+         'PING': self._pong,
+         'NOTICE': self._show_notice,
       }
       # TODO: add hooks for successful channel join, nick (changes self.nick)
 
+
+   # Initialize the settings, to defaults if not shown.
+   def __init_settings(self, settings):
+      # Currently there are no settings.
+      pass
 
    # Send a string to the IRC server over the socket. This just removes the
    # boilerplate \r\n on everything.
@@ -103,6 +110,8 @@ class Bot:
             print 'Trying with', attempt_nick
             self.__socksend('NICK ' + attempt_nick)
          # TODO 432 Erroneous Nickname
+         elif command in self.hooks:
+            self.hooks[command](msg)
          else:
             print 'Unknown IRC command:', msg
 
@@ -153,46 +162,70 @@ class Bot:
                   self.say(' '.join(user_input[2:]), user_input[1])
 
             elif sock == self.sock:
+               # first get and parse the message
                try:
                   msg = irc_message.IrcMessage(self.__get_line())
-                  print msg
                except EOFError:
                   print 'Connection closed unexpectedly'
                   return
                except ValueError as e:
                   print 'Problem parsing received line: %s' % e
 
+               # then run it through the list of extensions
+               stop = False
                for ext in self.extensions:
                   try:
-                     ext.act(msg)
+                     stop = ext.act(msg)
                   except Exception as e:
                      print 'Exception triggered from message:', msg
                      print 'in extension', ext.name
                      print e
                      traceback.print_exc()
 
-               # if msg.command in self.hooks:
-               #    try:
-               #       self.hooks[msg.command](self, msg)
-               #    except Exception as e:
-               #       print 'Exception triggered from message:', msg
-               #       print e
-               # else:
-               #    pass
-               #    # print 'No hook found'
+               # if no extension told it to terminate parsing, try
+               # calling the hook for it if there is one
+               if not stop:
+                  if msg.command in self.hooks:
+                     try:
+                        self.hooks[msg.command](msg)
+                     except Exception as e:
+                        print 'Exception triggered from message:', msg
+                        print 'in hook', msg.command
+                        print e
+                        traceback.print_exc()
+                  else:
+                     print 'Unknown IRC command received:', msg.command
+                     print 'Full message:', msg
+
+
+   # The destructor for the bot. Closes connections and calls all
+   # extensions' cleanup methods.
+   def cleanup(self):
+      self.sock.close()
+      print 'Connection closed successfully.'
+      for ext in self.extensions:
+         ext.cleanup()
 
 
    # Sets the bot's internal list of extensions.
    def set_extensions(self, extensions):
       self.extensions = extensions
 
+
    ### 
    ### Default hook functions
    ### These should all have 1 preceding underscore
    ### 
 
+   # Null hook. Do not act on the message in any way.
+   def _null_hook(self, msg):
+      pass
+
    # Send a PONG to the server.
-   def _pong(self, bot, msg):
+   def _pong(self, msg):
       self.sock.send('PONG :Pong')
 
+   # Show a NOTICE sent by the server.
+   def _show_notice(self, msg):
+      print msg.trail
 
