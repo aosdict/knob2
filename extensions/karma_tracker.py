@@ -6,6 +6,8 @@
 """
 
 import re
+import threading
+import time
 
 import irc_message
 import extension
@@ -17,13 +19,43 @@ class KarmaTracker(extension.Extension):
    name = "Karma Tracker"
    db = None
 
-   def __init__(self, bot, db, allow_minus=True):
+   def __init__(self, bot, db, settings={}):
       super(KarmaTracker, self).__init__(bot)
       self.db = db
-      self.allow_minus = allow_minus
+      self.__init_settings(settings)
       self.hooks = {
          'PRIVMSG': self.privmsg_handler
       }
+      if self.prevent_spam:
+         # maintain a dictionary of tuples of (sender, karmaed) to timestamp
+         # to prevent people from spamming karma
+         self.recent_karma = {}
+         self.exiting = False
+         # start checking for recent karma expired
+         threading.Thread(None, self.__recent_karma_expired).start()
+
+
+   # Initialize the extension's settings based on what was passed to the constructor.
+   def __init_settings(self, settings):
+      self.allow_minus = settings.get('allow_minus', True)
+      self.prevent_spam = settings.get('prevent_spam', True)
+      self.karma_timeout = settings.get('karma_timeout', 300)
+      # The flush_period should be significantly less than the karma_timeout.
+      self.flush_period = settings.get('flush_period', 30)
+
+
+   # Run an infinite loop that checks every so often to flush out the recent_karma list.
+   # This should be run in a new thread.
+   def __recent_karma_expired(self):
+      while not self.exiting:
+         now = time.time()
+         for key in self.recent_karma:
+            if now - self.recent_karma[key] > self.karma_timeout:
+               del self.recent_karma[key]
+
+         time.sleep(self.flush_period)
+
+      print "Karma Tracker polling thread finished"
 
 
    # Given a nick, return a dictionary representing the associated user in the database.
@@ -68,9 +100,16 @@ class KarmaTracker(extension.Extension):
             continue
 
          nick = s.rstrip('+-')
+         if self.prevent_spam and (sender, nick) in self.recent_karma:
+            continue
+
          user = self._get_user(nick)
+
          new_karma = user['karma'] + delta
          self.db.users.update({'nick': nick}, { '$set':  { 'karma': new_karma } })
+         if self.prevent_spam:
+            self.recent_karma[(sender, nick)] = time.time()
+
          points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
          out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)
          print out_str
@@ -87,7 +126,11 @@ class KarmaTracker(extension.Extension):
          recipient = msg.params[0]
          sender = msg.getSender()
          self._adjust_karma(karma_mod_list, recipient, sender)
-         return False
-      else:
          return True
+      else:
+         return False
+
+   def cleanup(self):
+      print 'Waiting for Karma Tracker thread to close...'
+      self.exiting = True
 
