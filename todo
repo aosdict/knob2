@@ -5,7 +5,6 @@ Maintain a dictionary of channel names to lists of nicks on those channels. This
 Handle 432 Erroneous Nickname command when trying to connect.
 Settings to control printing of certain messages to the console, like say results.
 Prepend eventual project name to extension module and class.
-Change set_extensions to just an init parameter.
 Document how extensions can communicate with each other. They can be initialized with each other's instances.
 More commands for the user on command line.
 Extension to say something when bot joins a channel (either first channel or any channel)
