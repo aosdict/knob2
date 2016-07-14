@@ -62,9 +62,11 @@ server = sys.argv[1]
 start_nick = sys.argv[2]
 channels = sys.argv[3].split(',')
 
+# any settings for the bot
 settings = {
 }
 
+# initialize bot
 jbot = bot.Bot(settings)
 
 # initialize all extensions
@@ -89,10 +91,16 @@ jbot.set_extensions([
    sc_ext,
 ])
 
+# connect to the given server with the given nick
 jbot.connect(server, start_nick)
 
+# join the specified channels
 for chan in channels:
    jbot.join('#'+chan)
 
+# start interacting with the server
 jbot.interact()
+
+# once the bot is killed by the user or server,
+# call its cleanup procedures and its extensions'
 jbot.cleanup()
