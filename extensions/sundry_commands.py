@@ -33,6 +33,8 @@ class SundryCommands(extension.Extension):
          '372': self.handle_372, # motd
          '375': self.handle_375, # start of motd
          '376': self.handle_376, # end of motd
+         # '432': self.handle_432, # erroneous nickname
+         # '433': self.handle_433, # nickname already in use
       }
 
    def __init_settings(self, settings):

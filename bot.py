@@ -8,6 +8,7 @@ import socket
 import select
 import errno
 import traceback
+import random
 
 import irc_message
 import extension
@@ -37,6 +38,12 @@ class Bot:
       # By default it automatically responds to PING messages with pongs.
       self.hooks = {
          'PING': self._pong,
+      }
+      # Separate set of system hooks that is only used before the 
+      # connection is formally established.
+      self.pre_welcome_hooks = {
+         '432': self._try_reformatted_nick,
+         '433': self._try_underscore_nick,
          'NOTICE': self._show_notice,
       }
       # TODO: add hooks for successful channel join, nick (changes self.nick)
@@ -84,9 +91,8 @@ class Bot:
             print variables.server,'connection error:',errno.errcode[serr.errno]
          raise serr
 
-      attempt_nick = nick
       self.__socksend('USER %s %s %s :%s' % (ident, server, server, realname))
-      self.__socksend('NICK %s' % attempt_nick)
+      self.__socksend('NICK %s' % nick)
 
       command = ""
       # wait for 001 (successful connection to the server)
@@ -103,15 +109,9 @@ class Bot:
          command = msg.command
          if command == '001':
             print 'Connection succeeded'
-            self.nick = attempt_nick
-         elif command == '433':
-            print 'Nickname', attempt_nick, 'was already in use'
-            attempt_nick += '_'
-            print 'Trying with', attempt_nick
-            self.__socksend('NICK ' + attempt_nick)
-         # TODO 432 Erroneous Nickname
-         elif command in self.hooks:
-            self.hooks[command](msg)
+            self.nick = msg.params[0]
+         elif command in self.pre_welcome_hooks:
+            self.pre_welcome_hooks[command](msg)
          else:
             print 'Unknown IRC command:', msg
 
@@ -223,9 +223,39 @@ class Bot:
 
    # Send a PONG to the server.
    def _pong(self, msg):
-      self.sock.send('PONG :Pong')
+      self.__socksend('PONG :Pong')
 
    # Show a NOTICE sent by the server.
    def _show_notice(self, msg):
-      print msg.trail
+      print 'NOTICE', msg.trail
+
+   # Take an erroneous nick returned by the server and attempt to
+   # send a NICK that is the same, with all nonalphabetic characters removed.
+   # If the returned nick is already alphabetic, try generating a 
+   # random 8 lowercase letters nick.
+   def _try_reformatted_nick(self, msg):
+      # get the nick
+      bad_nick = msg.params[1]
+      # prevent case of _try_underscore_nick appending so many
+      # underscores that it grows too long
+      bad_nick = bad_nick.rstrip('_')
+      if bad_nick.isalpha():
+         attempt = ''
+         for x in range(8):
+            attempt += random.choice('abcdefghijklmnopqrstuvwxyz')
+      else:
+         attempt = ''.join([i for i in bad_nick if i.isalpha()])
+
+      print 'Bad nick', bad_nick
+      print 'Trying', attempt
+      self.__socksend('NICK %s' % (attempt))
+
+   # When the server returns a nickname because it is already in use,
+   # append an underscore and send that nick.
+   def _try_underscore_nick(self, msg):
+      taken_nick = msg.params[1]
+      attempt = taken_nick + '_'
+      print 'Nickname', taken_nick, 'already in use'
+      print 'Trying', attempt
+      self.__socksend('NICK %s' % (attempt))
 
