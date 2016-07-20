@@ -8,6 +8,7 @@
 import re
 import threading
 import time
+from bson.objectid import ObjectId
 
 import irc_message
 import extension
@@ -31,6 +32,7 @@ class KarmaTracker(extension.Extension):
          # to prevent people from spamming karma
          self.recent_karma = {}
          self.exiting = False
+         self.recent_karma_lock = threading.Lock()
          # start checking for recent karma expired
          threading.Thread(None, self.__recent_karma_expired).start()
 
@@ -49,9 +51,10 @@ class KarmaTracker(extension.Extension):
    def __recent_karma_expired(self):
       while not self.exiting:
          now = time.time()
-         for key in self.recent_karma:
-            if now - self.recent_karma[key] > self.karma_timeout:
-               del self.recent_karma[key]
+         with self.recent_karma_lock:
+            for key in self.recent_karma.copy():
+               if now - self.recent_karma[key] > self.karma_timeout:
+                  self.recent_karma.pop(key)
 
          time.sleep(self.flush_period)
 
@@ -100,15 +103,18 @@ class KarmaTracker(extension.Extension):
             continue
 
          nick = s.rstrip('+-')
-         if self.prevent_spam and (sender, nick) in self.recent_karma:
-            continue
+         if self.prevent_spam:
+            with self.recent_karma_lock:
+               if (sender, nick) in self.recent_karma:
+                  continue
 
          user = self._get_user(nick)
 
          new_karma = user['karma'] + delta
          self.db.users.update({'nick': nick}, { '$set':  { 'karma': new_karma } })
          if self.prevent_spam:
-            self.recent_karma[(sender, nick)] = time.time()
+            with self.recent_karma_lock:
+               self.recent_karma[(sender, nick)] = time.time()
 
          points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
          out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)
