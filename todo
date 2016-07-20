@@ -1,6 +1,5 @@
 Main bot:
 Spawn new threads for hook functions. (Make multithreaded a setting for the bot)
-Settings to control printing of certain messages to the console, like say results.
 Document how extensions can communicate with each other. They can be initialized with each other's instances. (Though I would say it would be generally a bad practice to have extensions communicating.)
 More commands for the user on command line.
 Add setting to bot to control level of printing "unhandled" IRC messages: 0 = never print, 1 = print only if nothing handled it, 2 = print if something handled it but let it fall through, 3 = always print
@@ -14,6 +13,7 @@ Extension to say something when bot joins a channel (either first channel or any
 Maintain a dictionary of channel names to lists of nicks on those channels. This should be its own complete extension. It would involve hooking PART, NICK, JOIN, QUIT, NAMES commands.
 
 Karma Tracker:
+Add optionally printing message when karma is changed
 Add !karma command to make the bot return the karma amount for a user
 
 Command Handler:

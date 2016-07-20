@@ -26,7 +26,6 @@ class Bot:
    def __init__(self, settings = {}):
       self.sock = None
       self.__init_settings(settings)
-      self.settings = settings
       self.extensions = []
       # TODO: make a setting for "notify level" controlling what gets printed
       # at different priority levels.
@@ -49,15 +48,16 @@ class Bot:
       # TODO: add hooks for successful channel join, nick (changes self.nick)
 
 
-   # Initialize the settings, to defaults if not shown.
+   # Initialize the settings, to defaults if not given.
    def __init_settings(self, settings):
-      # Currently there are no settings.
-      pass
+      self.show_say = settings.get('show_say', False)
+
 
    # Send a string to the IRC server over the socket. This just removes the
    # boilerplate \r\n on everything.
    def __socksend(self, line):
       self.sock.sendall(line + '\r\n')
+
 
    # Get a line from the IRC server. Raises an EOFError if the connection is closed for some reason,
    # and also takes care of the \r\n on the end of every line.
@@ -139,7 +139,8 @@ class Bot:
       # It should never try to send a direct message to itself.
       # This can cause a feedback loop where it keeps resending
       # messages which will eventually get it kicked for flooding.
-      print 'Saying', msg_str, 'to', recipient
+      if self.show_say:
+         print 'Saying', msg_str, 'to', recipient
       if recipient == self.nick:
          print 'Warning: bot tried to send a message to itself'
          return

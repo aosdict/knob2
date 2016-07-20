@@ -29,6 +29,7 @@ channels = sys.argv[3].split(',')
 
 # any settings for the bot
 settings = {
+   'show_say': True,
 }
 
 # initialize bot
