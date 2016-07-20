@@ -59,7 +59,7 @@ class KarmaTracker(extension.Extension):
 
          time.sleep(self.flush_period)
 
-      print("Karma Tracker polling thread finished")
+      self.print("Karma Tracker polling thread finished")
 
 
    # Given a nick, return a dictionary representing the associated user in the database.
@@ -100,7 +100,7 @@ class KarmaTracker(extension.Extension):
             delta = -1
          else:
             # neither ++ or -- happened, this should not be possible
-            print('Warning: karma_mod_list encountered a name not followed by ++ or --:', s)
+            self.print('Warning: karma_mod_list encountered a name not followed by ++ or --:', s)
             continue
 
          nick = s.rstrip('+-')
@@ -119,7 +119,7 @@ class KarmaTracker(extension.Extension):
 
          if self.print_karma_changes:
             incdecstr = "in" if delta == 1 else "de"
-            print('Karma of %s %scremented by %s to %s' % (nick, incdecstr, sender, new_karma))
+            self.print('Karma of %s %scremented by %s to %s' % (nick, incdecstr, sender, new_karma))
 
          points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
          out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)
@@ -141,6 +141,6 @@ class KarmaTracker(extension.Extension):
          return False
 
    def cleanup(self):
-      print('Waiting for Karma Tracker thread to close...')
+      self.print('Waiting for Karma Tracker thread to close...')
       self.exiting = True
 

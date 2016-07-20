@@ -8,7 +8,6 @@ Should the bot know what channels it's currently on?
 
 General extensions stuff:
 Prepend eventual project name to extension module and class, rather than "Extension".
-Extension class defines a print function that will print "(Extension Name) " followed by the rest of the message.
 
 New planned extensions:
 Extension to say something when bot joins a channel (either first channel or any channel)

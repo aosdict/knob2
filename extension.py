@@ -12,8 +12,6 @@ import irc_message
 sys.dont_write_bytecode = True
 
 class Extension(object):
-   # # define metaclass properly as abstract
-   # __metaclass__ = abc.ABCMeta
 
    # variables
    name = "" # expected to be supplied by the implementor
@@ -38,6 +36,8 @@ class Extension(object):
    # Print a message to console. The message will be automatically
    # prefaced by the extension name to indicate where it's coming from.
    # Acts like normal print, with a variable number of args.
-   # def print33(*args):
-   #    args = [ "("+self.name+")" ] + args
-   #    print *args
+   def print(*args):
+      self = args[0]
+      ext_name_str = "(" + type(self).name + ")"
+      args = ( ext_name_str, ) + args[1:]
+      print(*args)

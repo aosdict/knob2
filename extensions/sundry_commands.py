@@ -47,93 +47,93 @@ class SundryCommands(extension.Extension):
    def handle_001(self, msg):
       # shouldn't ever be encountered while connected
       if self.show_server_info:
-         print('(welcome)', msg.trail)
+         self.print('(welcome)', msg.trail)
       return True
 
    def handle_002(self, msg):
       if self.show_server_info:
-         print('(server info)', msg.trail)
+         self.print('(server info)', msg.trail)
       return True
 
    def handle_003(self, msg):
       if self.show_server_info:
-         print('(server info)', msg.trail)
+         self.print('(server info)', msg.trail)
       return True
 
    def handle_004(self, msg):
       if self.show_server_info:
-         print('(server info) Server version:', msg.params[2])
-         print('(server info) User modes:', msg.params[3])
-         print('(server info) Channel modes:', msg.params[4])
+         self.print('(server info) Server version:', msg.params[2])
+         self.print('(server info) User modes:', msg.params[3])
+         self.print('(server info) Channel modes:', msg.params[4])
          if len(msg.params) > 5:
-            print('(server info) Channel modes requiring parameters:', msg.params[5])
+            self.print('(server info) Channel modes requiring parameters:', msg.params[5])
          if len(msg.params) > 6:
-            print('(server info) User modes requiring parameters:', msg.params[6])
+            self.print('(server info) User modes requiring parameters:', msg.params[6])
          if len(msg.params) > 7:
-            print('(server info) Server modes:', msg.params[7])
+            self.print('(server info) Server modes:', msg.params[7])
          if len(msg.params) > 8:
-            print('(server info) Server modes requiring parameters', msg.params[8])
+            self.print('(server info) Server modes requiring parameters', msg.params[8])
       return True
 
    def handle_005(self, msg):
       if self.show_server_info:
          for param in msg.params[1:]:
-            print('(server info) Server supports:', param)
+            self.print('(server info) Server supports:', param)
       return True
 
    def handle_250(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.trail)
+         self.print('(server stats)', msg.trail)
       return True
 
    def handle_251(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.trail)
+         self.print('(server stats)', msg.trail)
       return True
 
    def handle_252(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.params[1], 'operators online')
+         self.print('(server stats)', msg.params[1], 'operators online')
       return True
 
    def handle_253(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.params[1], 'unknown connections')
+         self.print('(server stats)', msg.params[1], 'unknown connections')
       return True
 
    def handle_254(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.params[1], 'channels')
+         self.print('(server stats)', msg.params[1], 'channels')
       return True
 
    def handle_255(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.trail)
+         self.print('(server stats)', msg.trail)
       return True
 
    def handle_265(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.trail)
+         self.print('(server stats)', msg.trail)
       return True
 
    def handle_266(self, msg):
       if self.show_server_stats:
-         print('(server stats)', msg.trail)
+         self.print('(server stats)', msg.trail)
       return True
 
    def handle_372(self, msg):
       if self.show_motd:
-         print(msg.trail)
+         self.print(msg.trail)
       return True
 
    def handle_375(self, msg):
       if self.show_motd:
-         print('Start of MOTD')
+         self.print('Start of MOTD')
       return True
 
    def handle_376(self, msg):
       if self.show_motd:
-         print('End of MOTD')
+         self.print('End of MOTD')
       return True
 
    def cleanup(self):
