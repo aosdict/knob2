@@ -20,7 +20,7 @@ db = mclient['jbot']
 
 # handle command-line args
 if len(sys.argv) != 4:
-   print 'Usage:', sys.argv[0], 'server nick channel_list'
+   print('Usage:', sys.argv[0], 'server nick channel_list')
    sys.exit(1)
 
 server = sys.argv[1]

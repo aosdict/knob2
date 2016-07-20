@@ -84,11 +84,11 @@ class Bot:
          self.sock.connect((server, port))
       except socket.error as serr:
          if serr.errno == errno.ECONNREFUSED:
-            print 'Connection error: Connection refused by server'
+            print('Connection error: Connection refused by server')
          elif serr.errno == errno.ENOEXEC:
-            print variables.server,"connection error: Exec format error (maybe the server you specified doesn't exist, or you have a problem connecting to the Internet)"
+            print(variables.server, "connection error: Exec format error (maybe the server you specified doesn't exist, or you have a problem connecting to the Internet)")
          else:
-            print variables.server,'connection error:',errno.errcode[serr.errno]
+            print(variables.server,'connection error:',errno.errcode[serr.errno])
          raise serr
 
       self.__socksend('USER %s %s %s :%s' % (ident, server, server, realname))
@@ -101,26 +101,26 @@ class Bot:
             line = self.__get_line()
             msg = irc_message.IrcMessage(line)
          except EOFError as e:
-            print 'Connection closed while waiting for 001'
+            print('Connection closed while waiting for 001')
             raise e
          except ValueError as e:
-            print 'Problem parsing received line: %s' % e
+            print('Problem parsing received line: %s' % e)
 
          command = msg.command
          if command == '001':
-            print 'Connection succeeded'
+            print('Connection succeeded')
             self.nick = msg.params[0]
          elif command in self.pre_welcome_hooks:
             self.pre_welcome_hooks[command](msg)
          else:
-            print 'Unknown IRC command:', msg
+            print('Unknown IRC command:', msg)
 
 
    # Attempts to join a channel.
    # TODO: allow this to take a list of channels
    def join(self, channelName):
       if len(channelName) < 1:
-         print 'Warning: tried to call join with an empty channel name, ignoring'
+         print('Warning: tried to call join with an empty channel name, ignoring')
          return
       if channelName[0] != '#':
          self.__socksend('JOIN #'+channelName)
@@ -140,9 +140,9 @@ class Bot:
       # This can cause a feedback loop where it keeps resending
       # messages which will eventually get it kicked for flooding.
       if self.show_say:
-         print 'Saying', msg_str, 'to', recipient
+         print('Saying', msg_str, 'to', recipient)
       if recipient == self.nick:
-         print 'Warning: bot tried to send a message to itself'
+         print('Warning: bot tried to send a message to itself')
          return
       self.__socksend('PRIVMSG %s :%s' % (recipient, msg_str))
 
@@ -167,10 +167,10 @@ class Bot:
                try:
                   msg = irc_message.IrcMessage(self.__get_line())
                except EOFError:
-                  print 'Connection closed unexpectedly'
+                  print('Connection closed unexpectedly')
                   return
                except ValueError as e:
-                  print 'Problem parsing received line: %s' % e
+                  print('Problem parsing received line: %s' % e)
 
                # then run it through the list of extensions
                stop = False
@@ -181,9 +181,9 @@ class Bot:
                      if stop:
                         break
                   except Exception as e:
-                     print 'Exception triggered from message:', msg
-                     print 'in extension', ext.name
-                     print e
+                     print('Exception triggered from message:', msg)
+                     print('in extension', ext.name)
+                     print(e)
                      traceback.print_exc()
 
                # if no extension told it to terminate parsing, try
@@ -193,20 +193,20 @@ class Bot:
                      try:
                         self.hooks[msg.command](msg)
                      except Exception as e:
-                        print 'Exception triggered from message:', msg
-                        print 'in hook', msg.command
-                        print e
+                        print('Exception triggered from message:', msg)
+                        print('in hook', msg.command)
+                        print(e)
                         traceback.print_exc()
                   else:
-                     print 'Unhandled IRC command received:', msg.command
-                     print 'Full message:', msg
+                     print('Unhandled IRC command received:', msg.command)
+                     print('Full message:', msg)
 
 
    # The destructor for the bot. Closes connections and calls all
    # extensions' cleanup methods.
    def cleanup(self):
       self.sock.close()
-      print 'Connection closed successfully.'
+      print('Connection closed successfully.')
       for ext in self.extensions:
          ext.cleanup()
 
@@ -231,7 +231,7 @@ class Bot:
 
    # Show a NOTICE sent by the server.
    def _show_notice(self, msg):
-      print 'NOTICE', msg.trail
+      print('NOTICE', msg.trail)
 
    # Take an erroneous nick returned by the server and attempt to
    # send a NICK that is the same, with all nonalphabetic characters removed.
@@ -250,8 +250,8 @@ class Bot:
       else:
          attempt = ''.join([i for i in bad_nick if i.isalpha()])
 
-      print 'Bad nick', bad_nick
-      print 'Trying', attempt
+      print('Bad nick', bad_nick)
+      print('Trying', attempt)
       self.__socksend('NICK %s' % (attempt))
 
    # When the server returns a nickname because it is already in use,
@@ -259,7 +259,7 @@ class Bot:
    def _try_underscore_nick(self, msg):
       taken_nick = msg.params[1]
       attempt = taken_nick + '_'
-      print 'Nickname', taken_nick, 'already in use'
-      print 'Trying', attempt
+      print('Nickname', taken_nick, 'already in use')
+      print('Trying', attempt)
       self.__socksend('NICK %s' % (attempt))
 
