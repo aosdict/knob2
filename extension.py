@@ -33,3 +33,11 @@ class Extension(object):
          return False
 
       return self.hooks[msg.command](msg)
+
+
+   # Print a message to console. The message will be automatically
+   # prefaced by the extension name to indicate where it's coming from.
+   # Acts like normal print, with a variable number of args.
+   # def print33(*args):
+   #    args = [ "("+self.name+")" ] + args
+   #    print *args
