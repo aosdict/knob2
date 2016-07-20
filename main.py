@@ -40,6 +40,7 @@ karma_ext_settings = {
    'prevent_spam': True,
    'karma_timeout': 5,
    'flush_period': 1,
+   'print_karma_changes': False,
 }
 karma_ext = karma_tracker.KarmaTracker(jbot, db, karma_ext_settings)
 quote_ext = quote_recorder.QuoteRecorder(jbot, db, True)

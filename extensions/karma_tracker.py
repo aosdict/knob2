@@ -42,8 +42,9 @@ class KarmaTracker(extension.Extension):
       self.allow_minus = settings.get('allow_minus', True)
       self.prevent_spam = settings.get('prevent_spam', True)
       self.karma_timeout = settings.get('karma_timeout', 300)
-      # The flush_period should be significantly less than the karma_timeout.
+      # The flush_period should be significantly less than the karma_timeout, maybe only a few seconds.
       self.flush_period = settings.get('flush_period', 30)
+      self.print_karma_changes = settings.get('print_karma_changes', False)
 
 
    # Run an infinite loop that checks every so often to flush out the recent_karma list.
@@ -115,6 +116,10 @@ class KarmaTracker(extension.Extension):
          if self.prevent_spam:
             with self.recent_karma_lock:
                self.recent_karma[(sender, nick)] = time.time()
+
+         if self.print_karma_changes:
+            incdecstr = "in" if delta == 1 else "de"
+            print('Karma of %s %scremented by %s to %s' % (nick, incdecstr, sender, new_karma))
 
          points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
          out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)

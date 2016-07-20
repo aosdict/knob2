@@ -1,9 +1,10 @@
 Main bot:
-Spawn new threads for hook functions. (Make multithreaded a setting for the bot)
+Spawn new threads for hook functions. (Make multithreaded a setting for the bot) (Maybe don't want to do this because hooks/extensions may want to stop other ones from executing)
 Document how extensions can communicate with each other. They can be initialized with each other's instances. (Though I would say it would be generally a bad practice to have extensions communicating.)
 More commands for the user on command line.
 Add setting to bot to control level of printing "unhandled" IRC messages: 0 = never print, 1 = print only if nothing handled it, 2 = print if something handled it but let it fall through, 3 = always print
 Change console quit so it actually sends a QUIT and allows the user to give a quit message
+Should the bot know what channels it's currently on?
 
 General extensions stuff:
 Prepend eventual project name to extension module and class, rather than "Extension".
@@ -20,3 +21,7 @@ Add !karma command to make the bot return the karma amount for a user
 Command Handler:
 Concept of privilege levels (at least 2): anyone can use the lowest level but only certain users/nicks can run commands at higher levels
 List of nicks who are privileged
+
+Sundry Commands:
+JOIN, 353 (NAMES), 366 (End of NAMES)
+
