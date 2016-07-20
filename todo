@@ -7,3 +7,5 @@ Prepend eventual project name to extension module and class.
 Document how extensions can communicate with each other. They can be initialized with each other's instances.
 More commands for the user on command line.
 Extension to say something when bot joins a channel (either first channel or any channel)
+Extension class defines a print function that will print "(Extension Name) " followed by the rest of the message.
+Add setting to bot to control level of printing "unhandled" IRC messages: 0 = never print, 1 = print only if nothing handled it, 2 = print if something handled it but let it fall through, 3 = always print
