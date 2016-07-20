@@ -56,20 +56,21 @@ class Bot:
    # Send a string to the IRC server over the socket. This just removes the
    # boilerplate \r\n on everything.
    def __socksend(self, line):
-      self.sock.sendall(line + '\r\n')
+      self.sock.sendall((line + '\r\n').encode('utf-8'))
 
 
    # Get a line from the IRC server. Raises an EOFError if the connection is closed for some reason,
    # and also takes care of the \r\n on the end of every line.
    def __get_line(self):
-      data = ''
+      data = bytearray()
       c = ''
-      while c != '\n':
+      while c != b'\n':
          c = self.sock.recv(1)
          data += c
       if not data:
          raise EOFError('Connection closed unexpectedly')
 
+      data = str(data, 'utf-8')
       return data.rstrip('\r\n')
 
 
