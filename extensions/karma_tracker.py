@@ -118,7 +118,6 @@ class KarmaTracker(extension.Extension):
 
          points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
          out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)
-         print out_str
          self.bot.say(out_str, channel)
 
 
