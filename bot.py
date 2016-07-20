@@ -176,6 +176,9 @@ class Bot:
                for ext in self.extensions:
                   try:
                      stop = ext.act(msg)
+                     # if the message told it to stop execution, don't try any more extensions
+                     if stop:
+                        break
                   except Exception as e:
                      print 'Exception triggered from message:', msg
                      print 'in extension', ext.name
@@ -194,7 +197,7 @@ class Bot:
                         print e
                         traceback.print_exc()
                   else:
-                     print 'Unknown IRC command received:', msg.command
+                     print 'Unhandled IRC command received:', msg.command
                      print 'Full message:', msg
 
 
