@@ -8,6 +8,7 @@ Printing to console in error cases while trying to negotiate nick
 
 General extensions stuff:
 Prepend eventual project name to extension module and class, rather than "Extension".
+Extensions should print a line to console when initialized
 
 New planned extensions:
 Extension to say something when bot joins a channel (either first channel or any channel)
