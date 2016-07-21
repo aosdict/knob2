@@ -23,6 +23,5 @@ Concept of privilege levels (at least 2): anyone can use the lowest level but on
 List of nicks who are privileged
 
 Sundry Commands:
-JOIN, 353 (NAMES), 366 (End of NAMES)
 Add option to use normal print instead of self.print (extension print) to remove (Sundry Commands) from everything.
 

@@ -17,6 +17,7 @@ class SundryCommands(extension.Extension):
       super(SundryCommands, self).__init__(bot)
       self.__init_settings(settings)
       self.hooks = {
+         'JOIN': self.handle_join, # join channel
          '001': self.handle_001, # welcome
          '002': self.handle_002, # your host is
          '003': self.handle_003, # server creation time
@@ -30,6 +31,8 @@ class SundryCommands(extension.Extension):
          '255': self.handle_255, # number of clients/servers
          '265': self.handle_265, # local users (NONSTANDARD)
          '266': self.handle_266, # global users (NONSTANDARD)
+         '353': self.handle_353, # Reply to NAMES
+         '366': self.handle_366, # end of NAMES list
          '372': self.handle_372, # motd
          '375': self.handle_375, # start of motd
          '376': self.handle_376, # end of motd
@@ -41,8 +44,15 @@ class SundryCommands(extension.Extension):
       self.show_server_info = settings.get('show_server_info', False)
       self.show_server_stats = settings.get('show_server_stats', False)
       self.show_motd = settings.get('show_motd', False)
+      self.show_names_list = settings.get('show_names_list', False)
+      self.show_starts = settings.get('show_starts', False)
+      self.show_ends = settings.get('show_ends', False)
 
    # Unimplemented handlers have a single return False statement.
+
+   def handle_join(self, msg):
+      self.print('Joined channel', msg.trail)
+      return True
 
    def handle_001(self, msg):
       # shouldn't ever be encountered while connected
@@ -121,19 +131,29 @@ class SundryCommands(extension.Extension):
          self.print('(server stats)', msg.trail)
       return True
 
+   def handle_353(self, msg):
+      if self.show_names_list:
+         self.print('(NAMES %s)' % msg.params[2], msg.trail)
+      return True
+
+   def handle_366(self, msg):
+      if self.show_names_list and self.show_ends:
+         self.print('(NAMES %s)' % msg.params[1], 'end of NAMES list')
+      return True
+
    def handle_372(self, msg):
       if self.show_motd:
-         self.print(msg.trail)
+         self.print('(motd)', msg.trail)
       return True
 
    def handle_375(self, msg):
-      if self.show_motd:
-         self.print('Start of MOTD')
+      if self.show_motd and self.show_starts:
+         self.print('(motd) Start of MOTD')
       return True
 
    def handle_376(self, msg):
-      if self.show_motd:
-         self.print('End of MOTD')
+      if self.show_motd and self.show_ends:
+         self.print('(motd) End of MOTD')
       return True
 
    def cleanup(self):

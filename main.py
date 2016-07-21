@@ -46,9 +46,12 @@ karma_ext_settings = {
 karma_ext = karma_tracker.KarmaTracker(jbot, db, karma_ext_settings)
 quote_ext = quote_recorder.QuoteRecorder(jbot, db, True)
 sc_ext_settings = {
+   'show_starts': False,
+   'show_ends': False,
    'show_server_stats': False,
    'show_server_info': False,
    'show_motd': False,
+   'show_names_list': False,
 }
 sc_ext = sundry_commands.SundryCommands(jbot, sc_ext_settings)
 
