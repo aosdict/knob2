@@ -25,10 +25,11 @@ class Extension(object):
 
    # Act on an irc message. This should not be called by the programmer.
    # Return a truth value representing whether the bot should continue
-   # trying to call act on other messages.
+   # trying to call act on other messages, or None if no hook exists for
+   # this message type.
    def act(self, msg):
       if msg.command not in self.hooks:
-         return False
+         return None
 
       return self.hooks[msg.command](msg)
 

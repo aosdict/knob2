@@ -30,6 +30,7 @@ channels = sys.argv[3].split(',')
 # any settings for the bot
 settings = {
    'show_say': True,
+   'message_print_level': bot.Bot.UNHANDLED_MESSAGES,
 }
 
 # initialize bot

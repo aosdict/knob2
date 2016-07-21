@@ -51,6 +51,7 @@ class Bot:
    # Initialize the settings, to defaults if not given.
    def __init_settings(self, settings):
       self.show_say = settings.get('show_say', False)
+      self.message_print_level = settings.get('message_print_level', 1)
 
 
    # Send a string to the IRC server over the socket. This just removes the
@@ -174,13 +175,18 @@ class Bot:
                   print('Problem parsing received line: %s' % e)
 
                # then run it through the list of extensions
-               stop = False
+               halt = False
+               handled = False
                for ext in self.extensions:
                   try:
-                     stop = ext.act(msg)
-                     # if the message told it to stop execution, don't try any more extensions
-                     if stop:
+                     retn = ext.act(msg)
+                     if retn == True:
+                        halt = True
+                        handled = True
                         break
+                     if retn == False:
+                        handled = True
+
                   except Exception as e:
                      print('Exception triggered from message:', msg)
                      print('in extension', ext.name)
@@ -188,9 +194,13 @@ class Bot:
                      traceback.print_exc()
 
                # if no extension told it to terminate parsing, try
-               # calling the hook for it if there is one
-               if not stop:
+               # calling the hook for it if there is one.
+               # This counts as handling and halting the message.
+               # For this reason, the default hooks list should be kept minimal.
+               if not halt:
                   if msg.command in self.hooks:
+                     halt = True
+                     handled = True
                      try:
                         self.hooks[msg.command](msg)
                      except Exception as e:
@@ -198,9 +208,21 @@ class Bot:
                         print('in hook', msg.command)
                         print(e)
                         traceback.print_exc()
-                  else:
-                     print('Unhandled IRC command received:', msg.command)
-                     print('Full message:', msg)
+
+               # based on halt and handle and message_print_level,
+               # determine whether to print it
+               if halt:
+                  if self.message_print_level >= Bot.ALL_MESSAGES:
+                     print('IRC message received (was handled and halted):')
+                     msg.print()
+               elif handled:
+                  if self.message_print_level >= Bot.FALL_THROUGH_MESSAGES:
+                     print('IRC message recieved (was handled but fell through):')
+                     msg.print()
+               else:
+                  if self.message_print_level >= Bot.UNHANDLED_MESSAGES:
+                     print('IRC message received (not caught by any extension or hook):')
+                     msg.print()
 
 
    # The destructor for the bot. Closes connections and calls all
@@ -263,4 +285,17 @@ class Bot:
       print('Nickname', taken_nick, 'already in use')
       print('Trying', attempt)
       self.__socksend('NICK %s' % (attempt))
+
+
+   ###
+   ### Constants for various settings
+   ###
+
+   # message_print_level
+   NO_MESSAGES = 0
+   UNHANDLED_MESSAGES = 1
+   FALL_THROUGH_MESSAGES = 2
+   ALL_MESSAGES = 3
+
+
 

@@ -56,6 +56,14 @@ class IrcMessage:
       return string_form % (self.prefix, self.command, " ".join(self.params), self.trail)
 
 
+   # Printer
+   def print(self):
+      print('   PREFIX: "%s"' % self.prefix)
+      print('   COMMAND: "%s"' % self.command)
+      print('   PARAMS: "%s"' % ', '.join(self.params))
+      print('   TRAIL: "%s"' % self.trail)
+
+
    # If the prefix is user!~server.com or similar, gets "user" from it
    def getSender(self):
       return self.prefix.split('!')[0]
