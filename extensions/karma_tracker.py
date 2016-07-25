@@ -77,7 +77,7 @@ class KarmaTracker(extension.Extension):
 
 
    # Given a list of nicks with ++ or -- after them, adjust each user's karma accordingly.
-   def _adjust_karma(self, karma_mod_list, channel, sender):
+   def _adjust_karma(self, karma_mod_list, sender, channel):
       for s in karma_mod_list:
          # don't let people change their own karma
          if s.find(sender) == 0:
@@ -121,21 +121,44 @@ class KarmaTracker(extension.Extension):
             incdecstr = "in" if delta == 1 else "de"
             self.print('Karma of %s %scremented by %s to %s' % (nick, incdecstr, sender, new_karma))
 
-         points_plural = "" if (new_karma == 1 or new_karma == -1) else "s"
-         out_str = '%s now has %s point%s of karma' % (nick, new_karma, points_plural)
+         out_str = '%s now has %s point%s of karma' % (nick, new_karma, self.plural(new_karma))
          self.bot.say(out_str, channel)
 
 
+   def handle_karma_command(self, message, sender, channel):
+      # Get and say the karma of the first param, and ignore anything else.
+      try:
+         nick = message.split()[1]
+      except IndexError:
+         nick = sender
+
+      cursor = self.db.users.find_one({'nick': nick}, {'karma': 1, '_id': 0})
+      try:
+         karma = cursor['karma']
+      except TypeError:
+         out_str = '%s has never received karma' % nick
+      else:
+         out_str = '%s has %s point%s of karma' % (nick, karma, self.plural(karma))
+
+      self.bot.say(out_str, channel)
+
+
    def privmsg_handler(self, msg):
+      recipient = msg.params[0]
+      sender = msg.getSender()
+
+      # look for !karma or !points first
+      if msg.trail[:6] == '!karma' or msg.trail[:7] == '!points':
+         self.handle_karma_command(msg.trail, sender, recipient)
+         return True
+
       if self.allow_minus:
          karma_mod_list = re.findall('[^ ]+(?:\+\+|--)', msg.trail)
       else:
          karma_mod_list = re.findall('[^ ]+\+\+', msg.trail)
 
       if len(karma_mod_list) > 0:
-         recipient = msg.params[0]
-         sender = msg.getSender()
-         self._adjust_karma(karma_mod_list, recipient, sender)
+         self._adjust_karma(karma_mod_list, sender, recipient)
          return True
       else:
          return False
@@ -144,3 +167,11 @@ class KarmaTracker(extension.Extension):
       self.print('Waiting for Karma Tracker thread to close...')
       self.exiting = True
 
+
+   # Given a karma number, return 's' if the karma is plural
+   # or '' if singular.
+   def plural(self, karma):
+      if karma == 1 or karma == -1:
+         return ''
+      else:
+         return 's'

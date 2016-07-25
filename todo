@@ -4,7 +4,6 @@ Document how extensions can communicate with each other. They can be initialized
 More commands for the user on command line.
 Change console quit so it actually sends a QUIT and allows the user to give a quit message
 Should the bot know what channels it's currently on, or is that better off as an extension?
-Printing to console in error cases while trying to negotiate nick
 
 General extensions stuff:
 Prepend eventual project name to extension module and class, rather than "Extension".
@@ -15,13 +14,13 @@ Extension to say something when bot joins a channel (either first channel or any
 Maintain a dictionary of channel names to lists of nicks on those channels. This should be its own complete extension. It would involve hooking PART, NICK, JOIN, QUIT, NAMES commands.
 
 Karma Tracker:
-Add optionally printing message when karma is changed
-Add !karma command to make the bot return the karma amount for a user
+Don't allow karmaing in private messages
 
 Command Handler:
 Concept of privilege levels (at least 2): anyone can use the lowest level but only certain users/nicks can run commands at higher levels
 List of nicks who are privileged
 
 Sundry Commands:
+QUIT, PART, and distinction for JOIN, PART, and QUIT between this user and other users
 Add option to use normal print instead of self.print (extension print) to remove (Sundry Commands) from everything.
-
+MODE
