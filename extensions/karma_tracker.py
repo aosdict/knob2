@@ -145,7 +145,10 @@ class KarmaTracker(extension.Extension):
       else:
          out_str = '%s has %s point%s of karma' % (nick, karma, self.plural(karma))
 
-      self.bot.say(out_str, recipient)
+      if recipient == self.bot.nick:
+         self.bot.say(out_str, sender)
+      else:
+         self.bot.say(out_str, recipient)
 
 
    def privmsg_handler(self, msg):
