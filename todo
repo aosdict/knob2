@@ -12,9 +12,10 @@ Extensions should print a line to console when initialized
 New planned extensions:
 Extension to say something when bot joins a channel (either first channel or any channel)
 Maintain a dictionary of channel names to lists of nicks on those channels. This should be its own complete extension. It would involve hooking PART, NICK, JOIN, QUIT, NAMES commands.
+facts: responds to <word>? messages and !randomfact with quotes that have isare defined on them
 
 Karma Tracker:
-Don't allow karmaing in private messages
+Fix !karma command not working in private messages
 
 Command Handler:
 Concept of privilege levels (at least 2): anyone can use the lowest level but only certain users/nicks can run commands at higher levels

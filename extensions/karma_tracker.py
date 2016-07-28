@@ -78,6 +78,11 @@ class KarmaTracker(extension.Extension):
 
    # Given a list of nicks with ++ or -- after them, adjust each user's karma accordingly.
    def _adjust_karma(self, karma_mod_list, sender, channel):
+
+      if channel[0] != '#':
+         self.bot.say('Karma may only be changed over public channels.', sender)
+         return
+
       for s in karma_mod_list:
          # don't let people change their own karma
          if s.find(sender) == 0:
@@ -125,7 +130,7 @@ class KarmaTracker(extension.Extension):
          self.bot.say(out_str, channel)
 
 
-   def handle_karma_command(self, message, sender, channel):
+   def handle_karma_command(self, message, sender, recipient):
       # Get and say the karma of the first param, and ignore anything else.
       try:
          nick = message.split()[1]
@@ -140,7 +145,7 @@ class KarmaTracker(extension.Extension):
       else:
          out_str = '%s has %s point%s of karma' % (nick, karma, self.plural(karma))
 
-      self.bot.say(out_str, channel)
+      self.bot.say(out_str, recipient)
 
 
    def privmsg_handler(self, msg):
