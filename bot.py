@@ -160,6 +160,8 @@ class Bot:
             if sock == sys.stdin:
                user_input = sys.stdin.readline().rstrip('\n').split()
                if user_input[0].lower() == 'quit':
+                  print(' '.join(user_input[1:]))
+                  self.__socksend('QUIT :' + ' '.join(user_input[1:]))
                   return
                elif user_input[0].lower() == 'tell':
                   self.say(' '.join(user_input[2:]), user_input[1])
