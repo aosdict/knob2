@@ -5,12 +5,24 @@
 """
 
 import re
+import random
 
 import irc_message
 import extension
 
 class Hype(extension.Extension):
    name = "Hype"
+   hype_msgs = {
+      'HYPE': 20,
+      'HYPE HYPE HYPE': 5,
+      'GET HYPE': 15,
+      'hype': 2,
+   }
+   hype_msgs_total = 0
+   for choice in hype_msgs:
+      hype_msgs_total += hype_msgs[choice]
+
+   exclamation_mark_prob = 0.3
 
    def __init__(self, bot, settings={}):
       super(Hype, self).__init__(bot)
@@ -36,8 +48,20 @@ class Hype(extension.Extension):
          self.hype(recipient)
          return True
 
+   def _get_random_hype_msg(self):
+      rand = random.uniform(0, Hype.hype_msgs_total)
+      curr = 0
+      for choice, weight in Hype.hype_msgs.items():
+         if curr + weight >= rand:
+            return choice
+         curr += weight
+
    def hype(self, recipient):
-      self.bot.say('HYPE', recipient)
+      hype_msg = self._get_random_hype_msg()
+      exclamation_str = ''
+      if random.random() < Hype.exclamation_mark_prob:
+         exclamation_str = '!' * random.randint(1,5)
+      self.bot.say('%s%s' % (hype_msg, exclamation_str), recipient)
 
    def cleanup(self):
       pass
