@@ -188,6 +188,7 @@ class Bot:
                         break
                      if retn == False:
                         handled = True
+                     # if retn is anything else, set neither halt nor handled
 
                   except Exception as e:
                      print('Exception triggered from message:', msg)
