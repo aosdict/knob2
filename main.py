@@ -13,6 +13,7 @@ import extension
 
 import extensions.karma_tracker as karma_tracker
 import extensions.hype as hype
+import extensions.quote_retriever as quote_retriever
 import extensions.quote_recorder as quote_recorder
 import extensions.sundry_commands as sundry_commands
 
@@ -46,7 +47,8 @@ karma_ext_settings = {
 }
 karma_ext = karma_tracker.KarmaTracker(jbot, db, karma_ext_settings)
 hype_ext = hype.Hype(jbot)
-quote_ext = quote_recorder.QuoteRecorder(jbot, db, True)
+quote_retriever_ext = quote_retriever.QuoteRetriever(jbot, db)
+quote_recorder_ext = quote_recorder.QuoteRecorder(jbot, db, True)
 sc_ext_settings = {
    'show_starts': False,
    'show_ends': False,
@@ -61,7 +63,8 @@ sc_ext = sundry_commands.SundryCommands(jbot, sc_ext_settings)
 jbot.set_extensions([
    karma_ext,
    hype_ext,
-   quote_ext,
+   quote_retriever_ext,
+   quote_recorder_ext,
    sc_ext,
 ])
 

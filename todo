@@ -24,6 +24,9 @@ More messages than just HYPE.
 Giphy integration (or any similar gif-serving site) that can get and post hype gifs
 Timeout for hyping that will set a timer when a hype message is sent, and not send anything before the timer runs out.
 
+Quote Retriever:
+Problem if any quotes are deleted from the database; it can try to find a quote with an index that doesn't exist
+
 Quote Recorder:
 
 Command Handler:
