@@ -13,12 +13,18 @@ New planned extensions:
 Extension to say something when bot joins a channel (either first channel or any channel)
 Maintain a dictionary of channel names to lists of nicks on those channels. This should be its own complete extension. It would involve hooking PART, NICK, JOIN, QUIT, NAMES commands.
 facts: responds to <word>? messages and !randomfact with quotes that have isare defined on them
-hype bot: responds to !hype and just "hype" messages with various hype things
 
 Karma Tracker:
 Allow a command for users to alias their nick to another nick (needs careful consideration on how to prevent people aliasing to an existing other person)
 Notify people who try to karma spam in a private message. (should be a setting)
 If someone karma spams too much, put them on a blocked list who can't karma people anymore (should be a setting)
+
+Hype:
+More messages than just HYPE.
+Giphy integration (or any similar gif-serving site) that can get and post hype gifs
+Timeout for hyping that will set a timer when a hype message is sent, and not send anything before the timer runs out.
+
+Quote Recorder:
 
 Command Handler:
 Concept of privilege levels (at least 2): anyone can use the lowest level but only certain users/nicks can run commands at higher levels
