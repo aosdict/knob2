@@ -38,3 +38,6 @@ class Hype(extension.Extension):
 
    def hype(self, recipient):
       self.bot.say('HYPE', recipient)
+
+   def cleanup(self):
+      pass
