@@ -13,6 +13,7 @@ New planned extensions:
 Extension to say something when bot joins a channel (either first channel or any channel)
 Maintain a dictionary of channel names to lists of nicks on those channels. This should be its own complete extension. It would involve hooking PART, NICK, JOIN, QUIT, NAMES commands.
 facts: responds to <word>? messages and !randomfact with quotes that have isare defined on them
+hype bot: responds to !hype and just "hype" messages with various hype things
 
 Karma Tracker:
 Allow a command for users to alias their nick to another nick (needs careful consideration on how to prevent people aliasing to an existing other person)
