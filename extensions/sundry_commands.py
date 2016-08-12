@@ -18,6 +18,9 @@ class SundryCommands(extension.Extension):
       self.__init_settings(settings)
       self.hooks = {
          'JOIN': self.handle_join, # join channel
+         'PART': self.handle_part, # leave channel
+         'QUIT': self.handle_quit, # quit out
+         'MODE': self.handle_mode, # mode change
          '001': self.handle_001, # welcome
          '002': self.handle_002, # your host is
          '003': self.handle_003, # server creation time
@@ -38,6 +41,7 @@ class SundryCommands(extension.Extension):
          '376': self.handle_376, # end of motd
          # '432': self.handle_432, # erroneous nickname
          # '433': self.handle_433, # nickname already in use
+         # 472 "is unknown mode char to me"? Look into it
       }
 
    def __init_settings(self, settings):
@@ -51,8 +55,35 @@ class SundryCommands(extension.Extension):
    # Unimplemented handlers have a single return False statement.
 
    def handle_join(self, msg):
-      self.print('Joined channel', msg.trail)
+      sender = msg.getSender()
+      if sender == self.bot.nick:
+         self.print('Joined channel', msg.trail)
+      else:
+         self.print(sender, 'joined channel', msg.trail)
       return True
+
+   def handle_part(self, msg):
+      sender = msg.getSender()
+      if sender == self.bot.nick:
+         self.print('Left channel', msg.trail)
+      else:
+         self.print(sender, 'left channel', msg.params[0])
+      return True
+
+   def handle_quit(self, msg):
+      sender = msg.getSender()
+      reason_str = "(%s)" % msg.trail
+      if sender == self.bot.nick:
+         self.print('Quit received from server', reason_str)
+      else:
+         self.print(sender, 'quit', reason_str)
+      return True
+
+   def handle_mode(self, msg):
+      # mode is weird because the prefix can either have a sender or not.
+      # the actual params are usually #channel [+-]x (any other params), so can
+      # probably do a ' '.join(params[1:])
+      pass
 
    def handle_001(self, msg):
       # shouldn't ever be encountered while connected
