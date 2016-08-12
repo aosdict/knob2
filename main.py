@@ -21,13 +21,15 @@ mclient = pymongo.MongoClient('localhost', 27017)
 db = mclient['jbot']
 
 # handle command-line args
-if len(sys.argv) != 4:
-   print('Usage:', sys.argv[0], 'server nick channel_list')
+if len(sys.argv) < 3:
+   print('Usage:', sys.argv[0], 'server nick [channel_list]')
    sys.exit(1)
 
 server = sys.argv[1]
 start_nick = sys.argv[2]
-channels = sys.argv[3].split(',')
+channels = []
+if len(sys.argv) == 4:
+   channels = sys.argv[3].split(',')
 
 # any settings for the bot
 settings = {
@@ -73,7 +75,7 @@ jbot.connect(server, start_nick)
 
 # join the specified channels
 for chan in channels:
-   jbot.join('#'+chan)
+   jbot.join(chan)
 
 # start interacting with the server
 jbot.interact()

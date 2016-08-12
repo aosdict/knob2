@@ -125,9 +125,8 @@ class Bot:
          print('Warning: tried to call join with an empty channel name, ignoring')
          return
       if channelName[0] != '#':
-         self.__socksend('JOIN #'+channelName)
-      else:
-         self.__socksend('JOIN '+channelName)
+         channelName = '#' + channelName
+      self.__socksend('JOIN '+channelName)
 
 
    # Add a new hook. This assigns a function to a certain type of command.
@@ -159,12 +158,23 @@ class Bot:
          for sock in read_socks:
             if sock == sys.stdin:
                user_input = sys.stdin.readline().rstrip('\n').split()
-               if user_input[0].lower() == 'quit':
-                  print(' '.join(user_input[1:]))
+               cmd = user_input[0].lower()
+               if cmd == 'quit':
                   self.__socksend('QUIT :' + ' '.join(user_input[1:]))
                   return
-               elif user_input[0].lower() == 'tell':
-                  self.say(' '.join(user_input[2:]), user_input[1])
+
+               elif cmd == 'tell':
+                  if len(user_input) < 3:
+                     print('Too few arguments to tell')
+                  else:
+                     self.say(' '.join(user_input[2:]), user_input[1])
+
+               elif cmd == 'join':
+                  if len(user_input) < 2:
+                     print('Too few arguments to join')
+                  else:
+                     self.join(user_input[1])
+
 
             elif sock == self.sock:
                # first get and parse the message

@@ -4,6 +4,7 @@ Document how extensions can communicate with each other. They can be initialized
 More commands for the user on command line.
 Change console quit so it actually sends a QUIT and allows the user to give a quit message
 Should the bot know what channels it's currently on, or is that better off as an extension?
+QUIT messages don't appear to be working
 
 General extensions stuff:
 Prepend eventual project name to extension module and class, rather than "Extension".
