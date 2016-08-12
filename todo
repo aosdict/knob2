@@ -9,6 +9,7 @@ QUIT messages don't appear to be working
 General extensions stuff:
 Prepend eventual project name to extension module and class, rather than "Extension".
 Extensions should print a line to console when initialized
+Use string.startswith for all command strings in extensions
 
 New planned extensions:
 Extension to say something when bot joins a channel (either first channel or any channel)
@@ -21,9 +22,9 @@ Notify people who try to karma spam in a private message. (should be a setting)
 If someone karma spams too much, put them on a blocked list who can't karma people anymore (should be a setting)
 
 Hype:
-Giphy integration (or any similar gif-serving site) that can get and post hype gifs
 Timeout for hyping that will set a timer when a hype message is sent, and not send anything before the timer runs out.
 Weird lag observed when entering "hype" many times fast.
+jbeck: once activated, send hype every second until a key phrase is received like "please stop"
 
 Quote Retriever:
 Problem if any quotes are deleted from the database; it can try to find a quote with an index that doesn't exist
@@ -35,6 +36,5 @@ Concept of privilege levels (at least 2): anyone can use the lowest level but on
 List of nicks who are privileged
 
 Sundry Commands:
-QUIT, PART, and distinction for JOIN, PART, and QUIT between this user and other users
 Add option to use normal print instead of self.print (extension print) to remove (Sundry Commands) from everything.
 MODE
